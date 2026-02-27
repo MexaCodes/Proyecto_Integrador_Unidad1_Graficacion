@@ -360,5 +360,6 @@ if __name__ == "__main__":
     generar_escenario()
 
 ```
-# Codigo comp
+
+
 
