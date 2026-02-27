@@ -244,3 +244,17 @@ bpy.context.scene.camera = cam_obj
 # Ejecución del programa
 if __name__ == "__main__":
     generar_escenario()
+
+```
+# RESULTADO
+<img width="1565" height="850" alt="Screenshot 2026-02-26 192128" src="https://github.com/user-attachments/assets/babe7b52-45d2-4281-b734-c847d0de00b2" />
+<img width="1577" height="862" alt="Screenshot 2026-02-26 192106" src="https://github.com/user-attachments/assets/b1801e6f-6dbd-4cc9-9385-efe06efac411" />
+<img width="1573" height="931" alt="Screenshot 2026-02-26 192145" src="https://github.com/user-attachments/assets/1760ea2a-bfd5-4cd8-8311-424da4a5dc87" />
+
+
+
+https://github.com/user-attachments/assets/6d3a7573-78ca-45e1-8417-f9f74dbc1e58
+
+
+
+
