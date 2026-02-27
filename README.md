@@ -255,6 +255,110 @@ if __name__ == "__main__":
 
 https://github.com/user-attachments/assets/6d3a7573-78ca-45e1-8417-f9f74dbc1e58
 
+# CODIGO COMPLETO
 
+```python
+import bpy
+import math
 
+# -----------------------------
+# 1. Crear materiales (Versión simplificada y compatible)
+# -----------------------------
+def crear_material(nombre, color_rgb):
+    mat = bpy.data.materials.new(name=nombre)
+    # Color para vista sólida
+    mat.diffuse_color = (*color_rgb, 1.0)
+    
+    # Color para Render (nodos)
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    # Buscamos el nodo principal que ya crea Blender por defecto
+    node_principled = nodes.get("Principled BSDF")
+    if node_principled:
+        node_principled.inputs['Base Color'].default_value = (*color_rgb, 1.0)
+    return mat
+
+# -----------------------------
+# 2. Función principal
+# -----------------------------
+def generar_escenario():
+    # Limpiar escena
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.object.delete()
+
+    # Materiales con los colores originales solicitados
+    mat_pared_a = crear_material("ParedOscura", (1, 0, 0))
+    mat_pared_b = crear_material("ParedDetalle", (0, 0, 1))
+    mat_suelo_a = crear_material("ParedOscura", (0, 1, 0))
+
+    largo_segmentos = 25
+    ancho_pasillo = 3
+    tamanio_bloque = 2
+    
+    puntos_camino = []
+
+    # 3. Construcción
+    for i in range(largo_segmentos):
+        pos_y = i * tamanio_bloque
+        curva = math.sin(i * 0.3) * 4 
+
+        puntos_camino.append((curva, pos_y, 1.2))
+
+        # Suelo
+        bpy.ops.mesh.primitive_plane_add(size=tamanio_bloque, location=(curva, pos_y, 0))
+        suelo = bpy.context.active_object
+        suelo.scale.x = ancho_pasillo
+        suelo.data.materials.append(mat_suelo_a)
+
+        # Pared izquierda
+        bpy.ops.mesh.primitive_cube_add(size=tamanio_bloque, location=(-ancho_pasillo + curva, pos_y, 1))
+        pared_izq = bpy.context.active_object
+        
+        if i % 2 == 0:
+            pared_izq.data.materials.append(mat_pared_a)
+        else:
+            pared_izq.data.materials.append(mat_pared_b)
+            pared_izq.scale.z = 1.8 
+
+        # Pared derecha
+        bpy.ops.mesh.primitive_cube_add(size=tamanio_bloque, location=(ancho_pasillo + curva, pos_y, 1))
+        pared_der = bpy.context.active_object
+        pared_der.data.materials.append(mat_pared_a)
+
+    # 4. Ruta de la Cámara
+    curve_data = bpy.data.curves.new('RutaCamara', type='CURVE')
+    curve_data.dimensions = '3D'
+    curve_data.use_path = True
+    curve_data.path_duration = 250
+    polyline = curve_data.splines.new('NURBS')
+    polyline.points.add(len(puntos_camino) - 1)
+    for idx, p in enumerate(puntos_camino):
+        polyline.points[idx].co = (p[0], p[1], p[2], 1)
+    polyline.use_endpoint_u = True
+    curve_obj = bpy.data.objects.new('RutaCamara', curve_data)
+    bpy.context.collection.objects.link(curve_obj)
+
+    # 5. Cámara
+    cam_data = bpy.data.cameras.new("Camara")
+    cam_obj = bpy.data.objects.new("Camara", cam_data)
+    bpy.context.collection.objects.link(cam_obj)
+    cam_obj.rotation_euler = (math.radians(90), 0, 0)
+    constraint = cam_obj.constraints.new(type='FOLLOW_PATH')
+    constraint.target = curve_obj
+    constraint.use_curve_follow = True
+    constraint.forward_axis = 'FORWARD_Y' 
+    constraint.up_axis = 'UP_Z'
+
+    # 6. Animación
+    curve_obj.data.eval_time = 0
+    curve_obj.data.keyframe_insert(data_path="eval_time", frame=1)
+    curve_obj.data.eval_time = 100
+    curve_obj.data.keyframe_insert(data_path="eval_time", frame=250)
+    bpy.context.scene.camera = cam_obj
+
+if __name__ == "__main__":
+    generar_escenario()
+
+```
+# Codigo comp
 
